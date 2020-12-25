@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using Database;
 using Services;
 
 namespace Shop
@@ -8,7 +7,6 @@ namespace Shop
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<ShopContext>().AsSelf();
             builder.RegisterModule<ServicesModule>();
         }
     }

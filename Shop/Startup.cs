@@ -1,4 +1,5 @@
 using Autofac;
+using Database;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -25,6 +26,7 @@ namespace Shop
         
         public void ConfigureContainer(ContainerBuilder builder)
         {
+            builder.Register(dbContext => new ShopContext(Configuration.GetConnectionString("Debug")));
             builder.RegisterModule<AppModule>();
         }
 

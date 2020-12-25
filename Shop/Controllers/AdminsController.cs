@@ -6,30 +6,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Shop.Controllers
 {
-    [Route("")]
-    public class AccountsController : ControllerBase
+    [Route("admin")]
+    public class AdminsController : Controller
     {
         private readonly ShopContext _dbContext;
 
-        public AccountsController(ShopContext dbContext)
+        public AdminsController(ShopContext dbContext)
         {
             _dbContext = dbContext;
         }
 
-        [HttpPost]
-        [Route("signUp")]
-        public async Task<IActionResult> SignUp([FromForm] User user)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest();
-            await _dbContext.User.AddAsync(user);
-            await _dbContext.SaveChangesAsync();
-            // Авторизация
-            return new EmptyResult();
-        }
-
         [HttpGet]
-        [Route("admin/list")]
+        [Route("list")]
         //[Authorize(Roles = "admin")]
         public async Task<List<Admin>> Get()
         {
@@ -37,7 +25,7 @@ namespace Shop.Controllers
         }
 
         [HttpPost]
-        [Route("admin/add")]
+        [Route("add")]
         //[Authorize(Roles = "admin")]
         public async Task<IActionResult> Add([FromBody] Admin admin)
         {
@@ -51,7 +39,7 @@ namespace Shop.Controllers
         }
 
         [HttpDelete]
-        [Route("admin/delete")]
+        [Route("delete")]
         //[Authorize(Roles = "admin")]
         public async Task<IActionResult> Remove(int adminId)
         {

@@ -4,7 +4,6 @@ namespace Database.Enums
 {
     public enum Brand
     {
-        
         [Description("Adidas")]
         Adidas = 1,
         [Description("Nike")]

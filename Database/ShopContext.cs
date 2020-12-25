@@ -7,16 +7,16 @@ namespace Database
 {
     public partial class ShopContext : DbContext
     {
-        private readonly IConfiguration _configuration;
-        public ShopContext(IConfiguration configuration)
+        private readonly string _connectionString;
+        public ShopContext(string connectionString)
         {
-            _configuration = configuration;
+            _connectionString = connectionString;
         }
 
-        public ShopContext(DbContextOptions<ShopContext> options, IConfiguration configuration)
+        public ShopContext(DbContextOptions<ShopContext> options, string connectionString)
             : base(options)
         {
-            _configuration = configuration;
+            _connectionString = connectionString;
         }
 
         public virtual DbSet<Admin> Admin { get; set; }
@@ -32,7 +32,7 @@ namespace Database
             if (!optionsBuilder.IsConfigured)
             {
 //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseMySql(_configuration.GetConnectionString("Debug"), x => x.ServerVersion("8.0.22-mysql"));
+                optionsBuilder.UseMySql(_connectionString, x => x.ServerVersion("8.0.22-mysql"));
             }
         }
 
