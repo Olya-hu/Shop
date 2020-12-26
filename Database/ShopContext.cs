@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.Extensions.Configuration;
 
 namespace Database
 {
@@ -171,6 +170,10 @@ namespace Database
 
             modelBuilder.Entity<User>(entity =>
             {
+                entity.HasIndex(e => e.Email)
+                    .HasName("email_UNIQUE")
+                    .IsUnique();
+
                 entity.HasIndex(e => e.Username)
                     .HasName("username_UNIQUE")
                     .IsUnique();
@@ -182,6 +185,10 @@ namespace Database
                 entity.Property(e => e.Country)
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
+
+                entity.Property(e => e.Email)
+                    .HasCharSet("utf8mb4")
+                    .HasCollation("utf8mb4_general_ci");
 
                 entity.Property(e => e.Password)
                     .HasCharSet("utf8mb4")
