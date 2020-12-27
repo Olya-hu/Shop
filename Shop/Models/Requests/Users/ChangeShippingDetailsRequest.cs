@@ -5,11 +5,11 @@ namespace Shop.Models.Requests.Users
 {
     public class ChangeShippingDetailsRequest
     {
-        [Required]
+        [Required(ErrorMessage = "Не указана страна")]
         public Country Country { get; set; }
-        [Required]
+        [Required(ErrorMessage = "Адрес не указан")]
         public string Address { get; set; }
-        [Required]
+        [Required(ErrorMessage = "Почтовый индекс не указан")]
         [DataType(DataType.PostalCode)]
         public string Postcode { get; set; }
     }

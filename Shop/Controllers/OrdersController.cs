@@ -2,6 +2,7 @@
 using System.Data;
 using System.Threading.Tasks;
 using Database;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.DbConnection;
 using Services.Orders;
@@ -27,7 +28,7 @@ namespace Shop.Controllers
         }
 
         [HttpPost]
-        //[Authorize(Roles = "user")]
+        [Authorize(Roles = "user")]
         public async Task<IActionResult> Index([FromBody] OrderRequest request)
         {
             if (!ModelState.IsValid)

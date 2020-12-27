@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Shop.Models.Requests.Users
+namespace Shop.Models.Requests.Admins
 {
     public class LoginRequest
     {
         [Required(ErrorMessage = "Не указано имя пользователя")]
         public string Username { get; set; }
+        
         [Required(ErrorMessage = "Не указан пароль")]
         [DataType(DataType.Password)]
         public string Password { get; set; }

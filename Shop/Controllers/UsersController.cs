@@ -16,11 +16,11 @@ namespace Shop.Controllers
     [Route("user")]
     public class UsersController : BaseDbController
     {
-        private readonly ShopContext _context;
+        private readonly ShopContext _dbContext;
 
         public UsersController(IShopConnection connection) : base(connection)
         {
-            _context = connection.Context;
+            _dbContext = connection.Context;
         }
 
         [HttpPost]
@@ -28,14 +28,14 @@ namespace Shop.Controllers
         public async Task<IActionResult> SignUp([FromForm] SignUpRequest request)
         {
             if (!ModelState.IsValid)
-                return BadRequest();
-            var user = (await _context.User.AddAsync(new User()
+                return ValidationProblem();
+            var user = (await _dbContext.User.AddAsync(new User()
             {
                 Username = request.Username,
                 Password = request.Password,
                 Email = request.Email
             })).Entity;
-            await _context.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
             await Authenticate(user);
             return RedirectToAction("ChangeShippingDetails");
         }
@@ -52,8 +52,8 @@ namespace Shop.Controllers
         public async Task<IActionResult> Login([FromForm] LoginRequest request)
         {
             if (!ModelState.IsValid)
-                return BadRequest();
-            var user = await _context.User.FirstOrDefaultAsync(u =>
+                return ValidationProblem();
+            var user = await _dbContext.User.FirstOrDefaultAsync(u =>
                 (u.Username == request.Username || u.Email == request.Username) && u.Password == request.Password);
             if (user == null)
                 ModelState.AddModelError("Некорректные аутентификационные данные", "Неверные логин и/или пароль");
@@ -76,7 +76,7 @@ namespace Shop.Controllers
                 claims.Add(new Claim("Address", user.Address));
             if (!string.IsNullOrEmpty(user.Postcode))
                 claims.Add(new Claim(ClaimTypes.PostalCode, user.Postcode));
-            var identity = new ClaimsIdentity(claims, "UserCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
+            var identity = new ClaimsIdentity(claims, "UserCookie", ClaimTypes.Name, ClaimTypes.Role);
             var principal = new ClaimsPrincipal(identity);
             await HttpContext.SignInAsync("UserAuthentication", 
                 principal,
@@ -86,21 +86,38 @@ namespace Shop.Controllers
                 });
         }
 
+        private async Task SignOut()
+        {
+            await HttpContext.SignOutAsync("UserAuthentication");
+        }
+        
         [Route("logout")]
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync("UserAuthentication");
+            await SignOut();
             return RedirectToAction("login");
         }
-        
+
         [HttpPost]
         [Route("changeShippingDetails")]
         [Authorize(Roles = "user")]
         public async Task<IActionResult> ChangeShippingDetails([FromForm] ChangeShippingDetailsRequest request)
         {
             if (!ModelState.IsValid)
-                return BadRequest();
-            return new EmptyResult();
+                return ValidationProblem();
+            if (!int.TryParse(HttpContext.User.FindFirst("Id").Value, out var id))
+                return Unauthorized();
+
+            var user = await _dbContext.User.FindAsync(id);
+            if (user == null)
+                return UnprocessableEntity();
+            await SignOut();
+            user.Country = request.Country;
+            user.Address = request.Address;
+            user.Postcode = request.Postcode;
+            await _dbContext.SaveChangesAsync();
+            await Authenticate(user);
+            return RedirectToAction("Index", "Home");
         }
     }
 }

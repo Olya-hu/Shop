@@ -63,8 +63,8 @@ namespace Services.Catalog
 
         public async Task AddProduct(AddItem request)
         {
-            if (request.Sizes.Length != request.Quantities.Length)
-                throw new Exception("Массивы размеров и их количеств не совпадают!");
+            //if (request.Sizes.Length != request.Quantities.Length)
+                //throw new Exception("Массивы размеров и их количеств не совпадают!");
             var product = await _dbContext.Product.AddAsync(new Product
             {
                 VendorCode = request.VendorCode,

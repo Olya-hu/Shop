@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Database;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Catalog;
 using Services.Catalog.Requests;
@@ -20,9 +21,9 @@ namespace Shop.Controllers
         }
 
         [HttpGet]
-        public async Task<List<Product>> Index([FromQuery] CatalogFilters filters)
+        public async Task<IActionResult> Index([FromQuery] CatalogFilters filters)
         {
-            return await _catalog.GetWithFilters(filters);
+            return ModelState.IsValid ? new ObjectResult(await _catalog.GetWithFilters(filters)) : ValidationProblem();
         }
 
         [HttpGet]
@@ -34,21 +35,13 @@ namespace Shop.Controllers
 
         [HttpPost]
         [Route("addItem")]
-        //[Authorize(Roles = "admin")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> AddItem([FromForm] AddItem request)
         {
             if (!ModelState.IsValid)
-                return BadRequest();
-            try
-            {
-                await _catalog.AddProduct(request);
-            }
-            catch (Exception)
-            {
-                return new StatusCodeResult(500);
-            }
-
-            return new EmptyResult();
+                return ValidationProblem();
+            await _catalog.AddProduct(request);
+            return Ok();
         }
     }
 }
