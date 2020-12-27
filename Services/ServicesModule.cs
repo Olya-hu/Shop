@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Services.Catalog;
+using Services.DbConnection;
 using Services.Orders;
 
 namespace Services
@@ -10,6 +11,7 @@ namespace Services
         {
             builder.RegisterType<CatalogService>().As<ICatalog>();
             builder.RegisterType<OrdersService>().As<IOrders>();
+            builder.RegisterType<ShopConnection>().As<IShopConnection>().SingleInstance();
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Database;
 using Microsoft.EntityFrameworkCore;
 using Services.Catalog.Requests;
+using Services.DbConnection;
 
 namespace Services.Catalog
 {
@@ -12,9 +13,9 @@ namespace Services.Catalog
     {
         private readonly ShopContext _dbContext;
 
-        public CatalogService(ShopContext dbContext)
+        public CatalogService(IShopConnection dbContext)
         {
-            _dbContext = dbContext;
+            _dbContext = dbContext.Context;
         }
 
         public async Task<List<Product>> GetWithFilters(CatalogFilters filters)
@@ -62,41 +63,31 @@ namespace Services.Catalog
 
         public async Task AddProduct(AddItem request)
         {
-            var transaction = await _dbContext.Database.BeginTransactionAsync();
-            try
+            if (request.Sizes.Length != request.Quantities.Length)
+                throw new Exception("Массивы размеров и их количеств не совпадают!");
+            var product = await _dbContext.Product.AddAsync(new Product
             {
-                if (request.Sizes.Length != request.Quantities.Length)
-                    throw new Exception("Массивы размеров и их количеств не совпадают!");
-                var product = await _dbContext.Product.AddAsync(new Product
+                VendorCode = request.VendorCode,
+                Name = request.Name,
+                Price = request.Price,
+                Description = request.Description,
+                Gender = request.Gender,
+                Category = request.Category,
+                Brand = request.Brand,
+                Color = request.Color
+            });
+            await _dbContext.SaveChangesAsync();
+            for (int i = 0; i < request.Sizes.Length; i++)
+            {
+                await _dbContext.ProductSize.AddAsync(new ProductSize
                 {
-                    VendorCode = request.VendorCode,
-                    Name = request.Name,
-                    Price = request.Price,
-                    Description = request.Description,
-                    Gender = request.Gender,
-                    Category = request.Category,
-                    Brand = request.Brand,
-                    Color = request.Color
+                    ProductId = product.Entity.Id,
+                    Size = request.Sizes[i],
+                    Quantity = request.Quantities[i]
                 });
-                await _dbContext.SaveChangesAsync();
-                for (int i = 0; i < request.Sizes.Length; i++)
-                {
-                    await _dbContext.ProductSize.AddAsync(new ProductSize
-                    {
-                        ProductId = product.Entity.Id,
-                        Size = request.Sizes[i],
-                        Quantity = request.Quantities[i]
-                    });
-                }
-                await _dbContext.SaveChangesAsync();
-            }
-            catch (Exception)
-            {
-                await transaction.RollbackAsync();
-                throw;
             }
 
-            await transaction.CommitAsync();
+            await _dbContext.SaveChangesAsync();
         }
     }
 }

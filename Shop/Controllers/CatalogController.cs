@@ -5,15 +5,16 @@ using Database;
 using Microsoft.AspNetCore.Mvc;
 using Services.Catalog;
 using Services.Catalog.Requests;
+using Services.DbConnection;
 
 namespace Shop.Controllers
 {
     [Route("catalog")]
-    public class CatalogController : Controller
+    public class CatalogController : BaseDbController
     {
         private readonly ICatalog _catalog;
 
-        public CatalogController(ICatalog catalog)
+        public CatalogController(ICatalog catalog, IShopConnection connection) : base(connection)
         {
             _catalog = catalog;
         }

@@ -1,18 +1,26 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Database;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Services.DbConnection;
 using Shop.Models.Requests.Users;
 
 namespace Shop.Controllers
 {
-    [Route("")]
-    public class UsersController : ControllerBase
+    [Route("user")]
+    public class UsersController : BaseDbController
     {
-        private readonly ShopContext _dbContext;
+        private readonly ShopContext _context;
 
-        public UsersController(ShopContext dbContext)
+        public UsersController(IShopConnection connection) : base(connection)
         {
-            _dbContext = dbContext;
+            _context = connection.Context;
         }
 
         [HttpPost]
@@ -21,24 +29,77 @@ namespace Shop.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest();
-            await _dbContext.User.AddAsync(new User()
+            var user = (await _context.User.AddAsync(new User()
             {
                 Username = request.Username,
                 Password = request.Password,
                 Email = request.Email
-            });
-            await _dbContext.SaveChangesAsync();
-            // Авторизация
-            return new EmptyResult();
+            })).Entity;
+            await _context.SaveChangesAsync();
+            await Authenticate(user);
+            return RedirectToAction("ChangeShippingDetails");
         }
 
+        [HttpGet]
+        [Route("login")]
+        public IActionResult Login()
+        {
+            return new EmptyResult();
+        }
+        
+        [HttpPost]
+        [Route("login")]
+        public async Task<IActionResult> Login([FromForm] LoginRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+            var user = await _context.User.FirstOrDefaultAsync(u =>
+                (u.Username == request.Username || u.Email == request.Username) && u.Password == request.Password);
+            if (user == null)
+                ModelState.AddModelError("Некорректные аутентификационные данные", "Неверные логин и/или пароль");
+            await Authenticate(user);
+            return RedirectToAction("Index", "Home");
+        }
+
+        private async Task Authenticate(User user)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim("Id", user.Id.ToString(), ClaimValueTypes.Integer),
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, "user")
+            };
+            if (user.Country != null)
+                claims.Add(new Claim("Country", user.Country.ToString()));
+            if (!string.IsNullOrEmpty(user.Address))
+                claims.Add(new Claim("Address", user.Address));
+            if (!string.IsNullOrEmpty(user.Postcode))
+                claims.Add(new Claim(ClaimTypes.PostalCode, user.Postcode));
+            var identity = new ClaimsIdentity(claims, "UserCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
+            var principal = new ClaimsPrincipal(identity);
+            await HttpContext.SignInAsync("UserAuthentication", 
+                principal,
+                new AuthenticationProperties
+                {
+                    ExpiresUtc = DateTime.UtcNow.AddDays(7)
+                });
+        }
+
+        [Route("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync("UserAuthentication");
+            return RedirectToAction("login");
+        }
+        
         [HttpPost]
         [Route("changeShippingDetails")]
+        [Authorize(Roles = "user")]
         public async Task<IActionResult> ChangeShippingDetails([FromForm] ChangeShippingDetailsRequest request)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
-            
             return new EmptyResult();
         }
     }

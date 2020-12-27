@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Database;
 using Microsoft.EntityFrameworkCore;
+using Services.DbConnection;
 using Services.Orders.Requests;
 
 namespace Services.Orders
@@ -13,9 +13,9 @@ namespace Services.Orders
     {
         private readonly ShopContext _dbContext;
 
-        public OrdersService(ShopContext dbContext)
+        public OrdersService(IShopConnection shopConnection)
         {
-            _dbContext = dbContext;
+            _dbContext = shopConnection.Context;
         }
 
         public async Task<List<Shipping>> GetShippings()
@@ -25,41 +25,29 @@ namespace Services.Orders
 
         public async Task Make(OrderRequest request)
         {
-            var transaction = await _dbContext.Database.BeginTransactionAsync();
-            try
+            if ((await _dbContext.User.FindAsync(request.UserId)).Postcode == null)
+                throw new ArgumentNullException("Отсутствует почтовый индекс");
+            var payment = await _dbContext.Product.Where(product => request.ProductIds.Contains(product.Id))
+                              .SumAsync(product => product.Price)
+                          + (await _dbContext.Shipping.FindAsync(request.ShippingId)).Price;
+            var order = await _dbContext.Order.AddAsync(new Order
             {
-                if ((await _dbContext.User.FindAsync(request.UserId)).Postcode == null)
-                    throw new ArgumentNullException("Отсутствует почтовый индекс");
-                var payment = await _dbContext.Product.Where(product => request.ProductIds.Contains(product.Id))
-                                  .SumAsync(product => product.Price)
-                              + (await _dbContext.Shipping.FindAsync(request.ShippingId)).Price;
-                var order = await _dbContext.Order.AddAsync(new Order
+                UserId = request.UserId,
+                ShippingId = request.ShippingId,
+                Date = DateTime.Now,
+                Payment = payment
+            });
+            await _dbContext.SaveChangesAsync();
+            foreach (var productId in request.ProductIds)
+            {
+                await _dbContext.ProductOrder.AddAsync(new ProductOrder
                 {
-                    UserId = request.UserId,
-                    ShippingId = request.ShippingId,
-                    Date = DateTime.Now,
-                    Payment = payment
+                    OrderId = order.Entity.Id,
+                    ProductId = productId
                 });
-                await _dbContext.SaveChangesAsync();
-                foreach (var productId in request.ProductIds)
-                {
-                    await _dbContext.ProductOrder.AddAsync(new ProductOrder
-                    {
-                        OrderId = order.Entity.Id,
-                        ProductId = productId
-                    });
-                }
-
-                await _dbContext.SaveChangesAsync();
-            }
-            catch (Exception)
-            {
-                await transaction.RollbackAsync();
-                throw;
             }
 
-            await transaction.CommitAsync();
-
+            await _dbContext.SaveChangesAsync();
         }
     }
 }

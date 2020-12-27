@@ -3,25 +3,26 @@ using System.Threading.Tasks;
 using Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Services.DbConnection;
 
 namespace Shop.Controllers
 {
     [Route("admin")]
-    public class AdminsController : Controller
+    public class AdminsController : BaseDbController
     {
-        private readonly ShopContext _dbContext;
+        private readonly ShopContext _context;
 
-        public AdminsController(ShopContext dbContext)
+        public AdminsController(IShopConnection shopConnection) : base(shopConnection)
         {
-            _dbContext = dbContext;
+            _context = shopConnection.Context;
         }
-
+        
         [HttpGet]
         [Route("list")]
         //[Authorize(Roles = "admin")]
         public async Task<List<Admin>> Get()
         {
-            return await _dbContext.Admin.ToListAsync();
+            return await _context.Admin.ToListAsync();
         }
 
         [HttpPost]
@@ -31,10 +32,8 @@ namespace Shop.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest();
-            var entity = await _dbContext.Admin.AddAsync(admin);
-            if (entity.State != EntityState.Added)
-                return new StatusCodeResult(500);
-            await _dbContext.SaveChangesAsync();
+            var entity = await _context.Admin.AddAsync(admin);
+            await _context.SaveChangesAsync();
             return new EmptyResult();
         }
 
@@ -43,10 +42,8 @@ namespace Shop.Controllers
         //[Authorize(Roles = "admin")]
         public async Task<IActionResult> Remove(int adminId)
         {
-            var entity = _dbContext.Admin.Remove(await _dbContext.Admin.FindAsync(adminId));
-            if (entity.State != EntityState.Deleted)
-                return new StatusCodeResult(500);
-            await _dbContext.SaveChangesAsync();
+            _context.Admin.Remove(await _context.Admin.FindAsync(adminId));
+            await _context.SaveChangesAsync();
             return new EmptyResult();
         }
     }
