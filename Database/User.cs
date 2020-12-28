@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Database.Enums;
@@ -32,6 +33,8 @@ namespace Database
         [Column("postcode", TypeName = "varchar(12)")]
         public string Postcode { get; set; }
 
+        [InverseProperty("User")]
+        public virtual Bag Bag { get; set; }
         [InverseProperty("User")]
         public virtual ICollection<Order> Order { get; set; }
     }

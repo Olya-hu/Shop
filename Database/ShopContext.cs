@@ -19,6 +19,7 @@ namespace Database
         }
 
         public virtual DbSet<Admin> Admin { get; set; }
+        public virtual DbSet<Bag> Bag { get; set; }
         public virtual DbSet<Order> Order { get; set; }
         public virtual DbSet<Product> Product { get; set; }
         public virtual DbSet<ProductOrder> ProductOrder { get; set; }
@@ -50,6 +51,28 @@ namespace Database
                 entity.Property(e => e.Username)
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
+            });
+
+            modelBuilder.Entity<Bag>(entity =>
+            {
+                entity.HasKey(e => e.UserId)
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.UserId).ValueGeneratedNever();
+
+                entity.Property(e => e.ProductId)
+                    .HasCharSet("utf8mb4")
+                    .HasCollation("utf8mb4_0900_ai_ci");
+
+                entity.Property(e => e.Size)
+                    .HasCharSet("utf8mb4")
+                    .HasCollation("utf8mb4_0900_ai_ci");
+
+                entity.HasOne(d => d.User)
+                    .WithOne(p => p.Bag)
+                    .HasForeignKey<Bag>(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("bag_user_fk");
             });
 
             modelBuilder.Entity<Order>(entity =>
@@ -110,12 +133,16 @@ namespace Database
 
             modelBuilder.Entity<ProductOrder>(entity =>
             {
-                entity.HasKey(e => new { e.OrderId, e.ProductId })
+                entity.HasKey(e => new { e.OrderId, e.ProductId, e.ProductSize })
                     .HasName("PRIMARY")
-                    .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0 });
+                    .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0, 0 });
 
                 entity.HasIndex(e => e.ProductId)
                     .HasName("productorder_product_fk");
+
+                entity.Property(e => e.ProductSize)
+                    .HasCharSet("utf8mb4")
+                    .HasCollation("utf8mb4_general_ci");
 
                 entity.HasOne(d => d.Order)
                     .WithMany(p => p.ProductOrder)
