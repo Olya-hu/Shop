@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Database.Enums;
 
 namespace Services.Orders.Requests
 {
@@ -12,5 +13,8 @@ namespace Services.Orders.Requests
         
         [Required]
         public int[] ProductIds { get; set; }
+        
+        [Required]
+        public Size[] Sizes { get; set; }
     }
 }

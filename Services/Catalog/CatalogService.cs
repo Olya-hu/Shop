@@ -61,7 +61,7 @@ namespace Services.Catalog
                 .ToDictionary(ps => ps.Size.ToString(), ps => ps.Quantity);
         }
 
-        public async Task AddProduct(AddItem request)
+        public async Task AddProduct(AddItem request, byte[] image)
         {
             //if (request.Sizes.Length != request.Quantities.Length)
                 //throw new Exception("Массивы размеров и их количеств не совпадают!");
@@ -74,7 +74,8 @@ namespace Services.Catalog
                 Gender = request.Gender,
                 Category = request.Category,
                 Brand = request.Brand,
-                Color = request.Color
+                Color = request.Color,
+                Image = image
             });
             await _dbContext.SaveChangesAsync();
             for (int i = 0; i < request.Sizes.Length; i++)

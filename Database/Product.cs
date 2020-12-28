@@ -39,6 +39,9 @@ namespace Database
         [Required]
         [Column("color", TypeName = "enum('White','Black','Black&White','Grey','Red','Orange','Yellow','Green','Cyan','Blue','Purple','Pink','Multicolor')")]
         public Color Color { get; set; }
+        [Required]
+        [Column("image", TypeName = "mediumblob")]
+        public byte[] Image { get; set; }
 
         [InverseProperty("Product")]
         public virtual ICollection<ProductOrder> ProductOrder { get; set; }

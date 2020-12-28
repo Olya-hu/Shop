@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Database;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Services.Catalog;
 using Services.Catalog.Requests;
@@ -36,11 +38,26 @@ namespace Shop.Controllers
         [HttpPost]
         [Route("addItem")]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> AddItem([FromForm] AddItem request)
+        public async Task<IActionResult> AddItem([FromForm] AddItem request, IFormFile file)
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid || file == null)
                 return ValidationProblem();
-            await _catalog.AddProduct(request);
+            byte[] image = null;
+            await using (var memoryStream = new MemoryStream())
+            {
+                await file.CopyToAsync(memoryStream);
+
+                // Файл меньше 4МБ
+                if (memoryStream.Length < 4194304)
+                {
+                    image = memoryStream.ToArray();
+                }
+                else
+                {
+                    ModelState.AddModelError("File", "The file is too large.");
+                }
+            }
+            await _catalog.AddProduct(request, image);
             return Ok();
         }
     }
