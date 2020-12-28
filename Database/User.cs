@@ -11,6 +11,7 @@ namespace Database
     {
         public User()
         {
+            Bag = new HashSet<Bag>();
             Order = new HashSet<Order>();
         }
 
@@ -34,7 +35,7 @@ namespace Database
         public string Postcode { get; set; }
 
         [InverseProperty("User")]
-        public virtual Bag Bag { get; set; }
+        public virtual ICollection<Bag> Bag { get; set; }
         [InverseProperty("User")]
         public virtual ICollection<Order> Order { get; set; }
     }

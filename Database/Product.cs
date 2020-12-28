@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Database.Enums;
@@ -10,7 +11,6 @@ namespace Database
     {
         public Product()
         {
-            ProductOrder = new HashSet<ProductOrder>();
             ProductSize = new HashSet<ProductSize>();
         }
 
@@ -43,8 +43,6 @@ namespace Database
         [Column("image", TypeName = "mediumblob")]
         public byte[] Image { get; set; }
 
-        [InverseProperty("Product")]
-        public virtual ICollection<ProductOrder> ProductOrder { get; set; }
         [InverseProperty("Product")]
         public virtual ICollection<ProductSize> ProductSize { get; set; }
     }

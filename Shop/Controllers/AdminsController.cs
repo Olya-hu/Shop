@@ -23,12 +23,11 @@ namespace Shop.Controllers
         {
             _dbContext = shopConnection.Context;
         }
-
-        [AllowAnonymous]
+        
         [HttpGet]
         public IActionResult Index()
         {
-            return HttpContext.User.Identity.IsAuthenticated ? null : RedirectToAction("Login");
+            return null;
         }
 
         [HttpPost]

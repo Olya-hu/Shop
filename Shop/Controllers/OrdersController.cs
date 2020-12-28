@@ -22,7 +22,7 @@ namespace Shop.Controllers
 
         [HttpGet]
         [Route("getShippings")]
-        public async Task<List<Shipping>> GetShippings()
+        public async Task<IEnumerable<Shipping>> GetShippings()
         {
             return await _orders.GetShippings();
         }
@@ -32,17 +32,35 @@ namespace Shop.Controllers
         public async Task<IActionResult> Index([FromBody] OrderRequest request)
         {
             if (!ModelState.IsValid)
-                return BadRequest();
-            try
-            {
-                await _orders.Make(request);
-            }
-            catch (DBConcurrencyException)
-            {
-                return new StatusCodeResult(500);
-            }
-
+                return ValidationProblem();
+            await _orders.Make(request);
             return new EmptyResult();
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "user")]
+        [Route("addToBag")]
+        public async Task<IActionResult> AddToBag([FromBody] ProductSize ps)
+        {
+            if (!ModelState.IsValid)
+                return ValidationProblem();
+            if (!int.TryParse(HttpContext.User.FindFirst(x => x.Type == "Id").Value, out var userId))
+                return Unauthorized();
+            if (ps.Quantity <= 0)
+                ModelState.AddModelError("Quantity", "Товара нет на складе");
+            else
+                await _orders.AddToBag(ps, userId);
+            return new EmptyResult();
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "user")]
+        [Route("bag")]
+        public async Task<IActionResult> GetBag()
+        {
+            if (!int.TryParse(HttpContext.User.FindFirst(x => x.Type == "Id").Value, out var userId))
+                return Unauthorized();
+            return new ObjectResult(await _orders.GetBagForUser(userId));
         }
     }
 }

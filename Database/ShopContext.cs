@@ -32,7 +32,7 @@ namespace Database
             if (!optionsBuilder.IsConfigured)
             {
 //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseMySql(_connectionString, x => x.ServerVersion("8.0.22-mysql"));
+                optionsBuilder.UseMySql("server=localhost;database=shop;user=root;password=root", x => x.ServerVersion("8.0.22-mysql"));
             }
         }
 
@@ -55,24 +55,28 @@ namespace Database
 
             modelBuilder.Entity<Bag>(entity =>
             {
-                entity.HasKey(e => e.UserId)
-                    .HasName("PRIMARY");
+                entity.HasKey(e => new { e.UserId, e.ProductId, e.Size })
+                    .HasName("PRIMARY")
+                    .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0, 0 });
 
-                entity.Property(e => e.UserId).ValueGeneratedNever();
-
-                entity.Property(e => e.ProductId)
-                    .HasCharSet("utf8mb4")
-                    .HasCollation("utf8mb4_0900_ai_ci");
+                entity.HasIndex(e => new { e.ProductId, e.Size })
+                    .HasName("bag_productsize_fk_idx");
 
                 entity.Property(e => e.Size)
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
                 entity.HasOne(d => d.User)
-                    .WithOne(p => p.Bag)
-                    .HasForeignKey<Bag>(d => d.UserId)
+                    .WithMany(p => p.Bag)
+                    .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("bag_user_fk");
+
+                entity.HasOne(d => d.ProductSize)
+                    .WithMany(p => p.Bag)
+                    .HasForeignKey(d => new { d.ProductId, d.Size })
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("bag_productsize_fk");
             });
 
             modelBuilder.Entity<Order>(entity =>
@@ -138,7 +142,13 @@ namespace Database
                     .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0, 0 });
 
                 entity.HasIndex(e => e.ProductId)
-                    .HasName("productorder_product_fk");
+                    .HasName("productorder_product_fk_idx");
+
+                entity.HasIndex(e => e.ProductSize)
+                    .HasName("productorder_size_fk_idx");
+
+                entity.HasIndex(e => new { e.ProductId, e.ProductSize })
+                    .HasName("productorder_productsize_fk_idx");
 
                 entity.Property(e => e.ProductSize)
                     .HasCharSet("utf8mb4")
@@ -152,9 +162,9 @@ namespace Database
 
                 entity.HasOne(d => d.Product)
                     .WithMany(p => p.ProductOrder)
-                    .HasForeignKey(d => d.ProductId)
+                    .HasForeignKey(d => new { d.ProductId, d.ProductSize })
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("productorder_product_fk");
+                    .HasConstraintName("productorder_productsize_fk");
             });
 
             modelBuilder.Entity<ProductSize>(entity =>

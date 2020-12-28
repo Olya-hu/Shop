@@ -7,7 +7,9 @@ namespace Services.Orders
 {
     public interface IOrders
     {
-        Task<List<Shipping>> GetShippings();
+        Task<IEnumerable<Shipping>> GetShippings();
         Task Make(OrderRequest request);
+        Task AddToBag(ProductSize ps, int userId);
+        Task<IEnumerable<Bag>> GetBagForUser(int userId);
     }
 }

@@ -52,7 +52,7 @@ namespace Services.Catalog
                 products = products.Where(product => ids.Contains(product.Id));
             }
 
-            return await products.ToListAsync();
+            return await products.Where(product => _dbContext.ProductSize.Any(ps => ps.ProductId == product.Id && ps.Quantity > 0)).ToListAsync();
         }
 
         public async Task<Dictionary<string, short>> GetSizesFor(int productId)
