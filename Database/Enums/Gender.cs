@@ -4,11 +4,11 @@ namespace Database.Enums
 {
     public enum Gender
     {
-        [Description("Male")]
+        [Description("Мужской")]
         Male = 1,
-        [Description("Female")]
+        [Description("Женский")]
         Female, 
-        [Description("Unisex")]
+        [Description("Унисекс")]
         Unisex
     }
 }

@@ -4,13 +4,13 @@ namespace Database.Enums
 {
     public enum Country
     {
-        [Description("Russia")]
+        [Description("Россия")]
         Russia = 1,
-        [Description("USA")]
+        [Description("США")]
         Usa,
-        [Description("UK")]
+        [Description("Великобритания")]
         Uk,
-        [Description("France")]
+        [Description("Франция")]
         France
     }
 }

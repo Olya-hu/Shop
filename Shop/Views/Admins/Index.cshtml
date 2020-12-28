@@ -1,0 +1,45 @@
+﻿@model IEnumerable<AdminViewModel>
+@{
+    ViewData["Title"] = "Администрация";
+}
+<div>
+    <h3>Добавить нового администратора</h3>
+    <form method="post" asp-action="Add">
+        <table>
+            <tr>
+                <td><input class="input-group-text" type="text" name="username" /></td>
+                <td><input type="submit" value="Добавить" /></td>
+            </tr>
+        </table>
+        
+    </form>
+    @if (ViewData["AdminsPassword"] != null)
+    {
+        if (!string.IsNullOrEmpty(ViewData["AdminsPassword"].ToString()))
+        {
+            <p>Пароль только что добавленного администратора: @ViewData["AdminsPassword"].ToString()<br/>
+                Сохраните его!</p>
+        }
+    }
+</div>
+<div>
+    <h2>Администраторы:</h2>
+    <table class="table">
+        <tr>
+            <th>Логин</th>
+            <th>Удаление</th>
+        </tr>
+        @foreach (var admin in Model)
+        {
+            <tr>
+                <td>@admin.Username</td>
+                <td>
+                    <form method="post" asp-action="Delete">
+                        <input type="hidden" name="adminId" value="@admin.Id"/>
+                        <input type="submit" value="Удалить"/>
+                    </form>
+                </td>
+            </tr>
+        }
+    </table>
+</div>

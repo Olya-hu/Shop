@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Database;
+using Database.Enums;
 using Microsoft.EntityFrameworkCore;
 using Services.Catalog.Requests;
 using Services.DbConnection;
@@ -55,7 +56,7 @@ namespace Services.Catalog
             return await products.Where(product => _dbContext.ProductSize.Any(ps => ps.ProductId == product.Id && ps.Quantity > 0)).ToListAsync();
         }
 
-        public async Task<Dictionary<string, short>> GetSizesFor(int productId)
+        public async Task<Dictionary<string, int>> GetSizesFor(int productId)
         {
             return (await _dbContext.ProductSize.Where(ps => ps.ProductId == productId).ToListAsync())
                 .ToDictionary(ps => ps.Size.ToString(), ps => ps.Quantity);
@@ -78,14 +79,18 @@ namespace Services.Catalog
                 Image = image
             });
             await _dbContext.SaveChangesAsync();
-            for (int i = 0; i < request.Sizes.Length; i++)
+            var sizes = Enum.GetValues(typeof(Size));
+            if (sizes.Length != request.Quantities.Length)
+                throw new Exception("Некорректный запрос");
+            for (var i = 0; i < sizes.Length; i++)
             {
-                await _dbContext.ProductSize.AddAsync(new ProductSize
-                {
-                    ProductId = product.Entity.Id,
-                    Size = request.Sizes[i],
-                    Quantity = request.Quantities[i]
-                });
+                if (request.Quantities[i] > 0)
+                    await _dbContext.ProductSize.AddAsync(new ProductSize
+                    {
+                        ProductId = product.Entity.Id,
+                        Size = (Size) sizes.GetValue(i),
+                        Quantity = request.Quantities[i]
+                    });
             }
 
             await _dbContext.SaveChangesAsync();

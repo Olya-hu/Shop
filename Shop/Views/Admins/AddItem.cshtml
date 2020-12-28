@@ -1,0 +1,71 @@
+﻿@using Database.Enums
+@using Services
+@{
+    ViewData["Title"] = "Добавить товар";
+}
+<div align="center">
+    <form method="post" asp-controller="Catalog" asp-action="AddItem" enctype="multipart/form-data">
+        <label>Артикул:</label>
+        <input type="text" name="VendorCode" /><br />
+        <label>Название:</label>
+        <input type="text" name="Name" /><br />
+        <label>Цена:</label>
+        <input type="number" name="Price" /><br />
+        <label>Описание (необязательно):</label><br/>
+        <textarea name="Description"></textarea><br />
+        <label>Пол:</label>
+        <table>
+            <tr>
+                @foreach (var gender in Enum.GetValues(typeof(Gender)))
+                {
+                    <td><input type="radio" name="Gender" value="@gender.GetHashCode()" /></td>
+                    <td> @(((Gender)gender).GetDescription())</td>
+                }
+            </tr>
+        </table>
+        <label>Категория:</label>
+        <table>
+            <tr>
+                @foreach (var category in Enum.GetValues(typeof(Category)))
+                {
+                    <td><input type="radio" name="Category" value="@category.GetHashCode()" /></td>
+                    <td> @(((Category)category).GetDescription())</td>
+                }
+            </tr>
+        </table>
+        <label>Брэнд:</label>
+        <table>
+            <tr>
+                @foreach (var brand in Enum.GetValues(typeof(Brand)))
+                {
+                    <td><input type="radio" name="Brand" value="@brand.GetHashCode()" /></td>
+                    <td> @(((Brand)brand).GetDescription())</td>
+                }
+            </tr>
+        </table>
+        <label>Цвет:</label>
+        <table>
+            <tr>
+                @foreach (var color in Enum.GetValues(typeof(Color)))
+                {
+                    <td><input type="radio" name="Color" value="@color.GetHashCode()" /> </td>
+                    <td>@(((Color)color).GetDescription())</td>
+                }
+            </tr>
+        </table>
+        <label>Размеры и их количество:</label>
+        <table>
+            @foreach (var size in Enum.GetValues(typeof(Size)))
+            {
+                <tr>
+                    <td>@(((Size)size).GetDescription()): </td>
+                    <td><input type="number" name="Quantities[]" value="0"/></td>
+                </tr>
+            }
+        </table>
+        <label>Фото:</label>
+        <input type="file" name="file"/>
+        <br /><br />
+        <input type="submit" value="Добавить" />
+    </form>
+</div>

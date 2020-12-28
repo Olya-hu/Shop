@@ -4,31 +4,31 @@ namespace Database.Enums
 {
     public enum Color
     {
-        [Description("White")]
+        [Description("Белый")]
         White = 1,
-        [Description("Black")]
+        [Description("Чёрный")]
         Black, 
-        [Description("Black&White")]
+        [Description("Чёрно-белый")]
         BlackWhite, 
-        [Description("Grey")]
+        [Description("Серый")]
         Grey, 
-        [Description("Red")]
+        [Description("Красный")]
         Red, 
-        [Description("Orange")]
+        [Description("Оранжевый")]
         Orange, 
-        [Description("Yellow")]
+        [Description("Жёлтый")]
         Yellow, 
-        [Description("Green")]
+        [Description("Зелёный")]
         Green,
-        [Description("Cyan")]
+        [Description("Голубой")]
         Cyan, 
-        [Description("Blue")]
+        [Description("Синий")]
         Blue, 
-        [Description("Purple")]
+        [Description("Фиолетовый")]
         Purple, 
-        [Description("Pink")]
+        [Description("Розовый")]
         Pink, 
-        [Description("Multicolor")]
+        [Description("Разноцветный")]
         Multicolor
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Database;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Services.DbConnection;
+using Shop.Models;
 using Shop.Models.Requests.Admins;
 
 namespace Shop.Controllers
@@ -18,18 +20,33 @@ namespace Shop.Controllers
     public class AdminsController : BaseDbController
     {
         private readonly ShopContext _dbContext;
+        private string _recentlyAddedAdminsPassword;
 
         public AdminsController(IShopConnection shopConnection) : base(shopConnection)
         {
             _dbContext = shopConnection.Context;
         }
-        
+
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return null;
+            ViewData["AdminsPassword"] = _recentlyAddedAdminsPassword;
+            _recentlyAddedAdminsPassword = null;
+            return View(await _dbContext.Admin.Select(admin => new AdminViewModel
+            {
+                Id = admin.Id,
+                Username = admin.Username
+            }).ToListAsync());
         }
 
+        [HttpGet]
+        [Route("login")]
+        [AllowAnonymous]
+        public IActionResult Login()
+        {
+            return View();
+        }
+        
         [HttpPost]
         [Route("login")]
         [AllowAnonymous]
@@ -37,7 +54,8 @@ namespace Shop.Controllers
         {
             if (!ModelState.IsValid)
                 return ValidationProblem();
-            var admin = await _dbContext.Admin.FirstOrDefaultAsync(a => a.Username == request.Username && a.Password == request.Password);
+            var admin = await _dbContext.Admin.FirstOrDefaultAsync(a =>
+                a.Username == request.Username && a.Password == request.Password);
             if (admin == null)
                 ModelState.AddModelError("Некорректные аутентификационные данные", "Неверные логин и/или пароль");
             await Authenticate(admin);
@@ -61,20 +79,14 @@ namespace Shop.Controllers
                 });
         }
 
-        [HttpDelete]
+        [HttpGet]
         [Route("logout")]
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync("AdminAuthentication");
-            return RedirectToAction("Index", "Home");
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Index");
         }
-        
-        [HttpGet]
-        [Route("list")]
-        public async Task<List<Admin>> GetAdminsList()
-        {
-            return await _dbContext.Admin.ToListAsync();
-        }
+
 
         [HttpPost]
         [Route("add")]
@@ -82,13 +94,23 @@ namespace Shop.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest();
-            await _dbContext.Admin.AddAsync(new Admin
+            _recentlyAddedAdminsPassword = RandomPassword();
+            try
             {
-                Username = username,
-                Password = RandomPassword()
-            });
-            await _dbContext.SaveChangesAsync();
-            return new EmptyResult();
+                await _dbContext.Admin.AddAsync(new Admin
+                {
+                    Username = username,
+                    Password = _recentlyAddedAdminsPassword
+                });
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                _recentlyAddedAdminsPassword = null;
+                throw;
+            }
+
+            return RedirectToAction("Index");
         }
 
         private static string RandomPassword()
@@ -105,13 +127,14 @@ namespace Shop.Controllers
             return password;
         }
 
-        [HttpDelete]
+        [HttpPost]
         [Route("delete")]
         public async Task<IActionResult> Delete(int adminId)
         {
-            _dbContext.Admin.Remove(await _dbContext.Admin.FindAsync(adminId));
+            var admin = await _dbContext.Admin.FindAsync(adminId);
+            _dbContext.Admin.Remove(admin);
             await _dbContext.SaveChangesAsync();
-            return new EmptyResult();
+            return RedirectToAction("Index");
         }
     }
 }

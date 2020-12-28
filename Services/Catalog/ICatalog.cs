@@ -8,7 +8,7 @@ namespace Services.Catalog
     public interface ICatalog
     {
         Task<List<Product>> GetWithFilters(CatalogFilters filters);
-        Task<Dictionary<string, short>> GetSizesFor(int productId);
+        Task<Dictionary<string, int>> GetSizesFor(int productId);
         Task AddProduct(AddItem request, byte[] image);
     }
 }

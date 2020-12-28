@@ -21,13 +21,6 @@ namespace Services.Catalog.Requests
         [Required]
         public Color Color { get; set; }
         [Required]
-        public Size[] Sizes { get; set; }
-        [Required]
-        public short[] Quantities { get; set; }
-
-        private int SizesLength => Sizes.Length;
-        
-        [Compare("SizesLength", ErrorMessage = "Не соответствие между размерами и количеством")]
-        private int QuantitiesLength => Quantities.Length;
+        public int[] Quantities { get; set; }
     }
 }

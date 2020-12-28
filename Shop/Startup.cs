@@ -76,7 +76,7 @@ namespace Shop
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}");
+                endpoints.MapControllerRoute("default", "{controller=Catalog}/{action=Index}");
             });
         }
     }

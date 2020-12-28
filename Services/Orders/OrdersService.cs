@@ -54,6 +54,8 @@ namespace Services.Orders
                 await _dbContext.SaveChangesAsync();
                 var productSize = await _dbContext.ProductSize.FindAsync(bagItem.ProductId, bagItem.Size);
                 productSize.Quantity--;
+                if (productSize.Quantity == 0)
+                    _dbContext.ProductSize.Remove(productSize);
                 await _dbContext.SaveChangesAsync();
             }
         }

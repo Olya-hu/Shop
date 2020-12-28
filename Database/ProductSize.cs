@@ -22,7 +22,7 @@ namespace Database
         [Column("size", TypeName = "enum('36','38','40','42','44','46','48','50','52','54','56')")]
         public Size Size { get; set; }
         [Column("quantity")]
-        public short Quantity { get; set; }
+        public int Quantity { get; set; }
 
         [ForeignKey(nameof(ProductId))]
         [InverseProperty("ProductSize")]

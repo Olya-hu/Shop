@@ -28,9 +28,17 @@ namespace Shop.Controllers
 
         [HttpGet]
         [Route("{productId:int}/sizes")]
-        public async Task<Dictionary<string, short>> GetSizesFor(int productId)
+        public async Task<Dictionary<string, int>> GetSizesFor(int productId)
         {
             return await _catalog.GetSizesFor(productId);
+        }
+        
+        [HttpGet]
+        [Route("addItem")]
+        [Authorize(Roles = "admin")]
+        public IActionResult AddItem()
+        {
+            return View("~/Views/Admins/AddItem.cshtml");
         }
 
         [HttpPost]
@@ -56,7 +64,7 @@ namespace Shop.Controllers
                 }
             }
             await _catalog.AddProduct(request, image);
-            return Ok();
+            return RedirectToAction("AddItem");
         }
     }
 }

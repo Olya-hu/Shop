@@ -4,11 +4,11 @@ namespace Database.Enums
 {
     public enum Category
     {
-        [Description("Clothes")]
+        [Description("Одежда")]
         Clothes = 1, 
-        [Description("Footwear")]
+        [Description("Обувь")]
         Footwear, 
-        [Description("Sportswear")]
+        [Description("Спорт")]
         Sportswear
     }
 }
