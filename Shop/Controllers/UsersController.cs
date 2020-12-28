@@ -78,7 +78,7 @@ namespace Shop.Controllers
                 claims.Add(new Claim(ClaimTypes.PostalCode, user.Postcode));
             var identity = new ClaimsIdentity(claims, "UserCookie", ClaimTypes.Name, ClaimTypes.Role);
             var principal = new ClaimsPrincipal(identity);
-            await HttpContext.SignInAsync("UserAuthentication", 
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, 
                 principal,
                 new AuthenticationProperties
                 {
@@ -91,6 +91,7 @@ namespace Shop.Controllers
             await HttpContext.SignOutAsync("UserAuthentication");
         }
         
+        [HttpDelete]
         [Route("logout")]
         public async Task<IActionResult> Logout()
         {

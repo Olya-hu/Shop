@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Database;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,7 @@ namespace Shop.Controllers
         }
 
         [AllowAnonymous]
+        [HttpGet]
         public IActionResult Index()
         {
             return HttpContext.User.Identity.IsAuthenticated ? null : RedirectToAction("Login");
@@ -31,6 +33,7 @@ namespace Shop.Controllers
 
         [HttpPost]
         [Route("login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([FromForm] LoginRequest request)
         {
             if (!ModelState.IsValid)
@@ -51,7 +54,7 @@ namespace Shop.Controllers
             };
             var identity = new ClaimsIdentity(claims, "AdminCookie", ClaimTypes.Name, ClaimTypes.Role);
             var principal = new ClaimsPrincipal(identity);
-            await HttpContext.SignInAsync("AdminAuthentication",
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                 principal,
                 new AuthenticationProperties
                 {
@@ -59,6 +62,8 @@ namespace Shop.Controllers
                 });
         }
 
+        [HttpDelete]
+        [Route("logout")]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync("AdminAuthentication");
@@ -103,7 +108,7 @@ namespace Shop.Controllers
 
         [HttpDelete]
         [Route("delete")]
-        public async Task<IActionResult> Remove(int adminId)
+        public async Task<IActionResult> Delete(int adminId)
         {
             _dbContext.Admin.Remove(await _dbContext.Admin.FindAsync(adminId));
             await _dbContext.SaveChangesAsync();

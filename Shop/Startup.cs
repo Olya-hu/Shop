@@ -21,18 +21,18 @@ namespace Shop
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAuthentication("UserAuthentication")
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options => //CookieAuthenticationOptions
                 {
-                    options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/user/login");
+                    //options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/user/login");
                     options.AccessDeniedPath = new Microsoft.AspNetCore.Http.PathString("/user/login");
                 });
-            services.AddAuthentication("AdminAuthentication")
-                .AddCookie(options => //CookieAuthenticationOptions
-                {
-                    options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/admin/login");
-                    options.AccessDeniedPath = new Microsoft.AspNetCore.Http.PathString("/user/login");
-                });
+            // services.AddAuthentication("AdminAuthentication")
+            //     .AddCookie(options => //CookieAuthenticationOptions
+            //     {
+            //         options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/admin/login");
+            //         options.AccessDeniedPath = new Microsoft.AspNetCore.Http.PathString("/user/login");
+            //     });
             services.AddControllersWithViews();
             services.AddSwaggerGen();
         }
@@ -64,7 +64,7 @@ namespace Shop
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
                 {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                    c.SwaggerEndpoint("v1/swagger.json", "My API V1");
                 });
             }
 
