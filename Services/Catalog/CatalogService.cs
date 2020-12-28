@@ -79,16 +79,13 @@ namespace Services.Catalog
                 Image = image
             });
             await _dbContext.SaveChangesAsync();
-            var sizes = Enum.GetValues(typeof(Size));
-            if (sizes.Length != request.Quantities.Length)
-                throw new Exception("Некорректный запрос");
-            for (var i = 0; i < sizes.Length; i++)
+            for (var i = 0; i < request.Sizes.Length; i++)
             {
                 if (request.Quantities[i] > 0)
                     await _dbContext.ProductSize.AddAsync(new ProductSize
                     {
                         ProductId = product.Entity.Id,
-                        Size = (Size) sizes.GetValue(i),
+                        Size = request.Sizes[i],
                         Quantity = request.Quantities[i]
                     });
             }

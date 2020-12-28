@@ -21,11 +21,11 @@ namespace Database
         [Column("vendor_code", TypeName = "varchar(16)")]
         public string VendorCode { get; set; }
         [Required]
-        [Column("name", TypeName = "varchar(64)")]
+        [Column("name", TypeName = "tinytext")]
         public string Name { get; set; }
         [Column("price", TypeName = "decimal(8,2)")]
         public decimal Price { get; set; }
-        [Column("description", TypeName = "mediumtext")]
+        [Column("description", TypeName = "text")]
         public string Description { get; set; }
         [Required]
         [Column("gender", TypeName = "enum('Male','Female','Unisex')")]

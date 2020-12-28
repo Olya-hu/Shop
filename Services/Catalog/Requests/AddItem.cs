@@ -21,6 +21,8 @@ namespace Services.Catalog.Requests
         [Required]
         public Color Color { get; set; }
         [Required]
+        public Size[] Sizes { get; set; }
+        [Required]
         public int[] Quantities { get; set; }
     }
 }

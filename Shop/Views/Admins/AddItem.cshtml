@@ -5,15 +5,15 @@
 }
 <div align="center">
     <form method="post" asp-controller="Catalog" asp-action="AddItem" enctype="multipart/form-data">
-        <label>Артикул:</label>
+        <h4>Артикул:</h4>
         <input type="text" name="VendorCode" /><br />
-        <label>Название:</label>
+        <h4>Название:</h4>
         <input type="text" name="Name" /><br />
-        <label>Цена:</label>
+        <h4>Цена:</h4>
         <input type="number" name="Price" /><br />
-        <label>Описание (необязательно):</label><br/>
+        <h4>Описание (необязательно):</h4><br/>
         <textarea name="Description"></textarea><br />
-        <label>Пол:</label>
+        <h4>Пол:</h4>
         <table>
             <tr>
                 @foreach (var gender in Enum.GetValues(typeof(Gender)))
@@ -23,7 +23,7 @@
                 }
             </tr>
         </table>
-        <label>Категория:</label>
+        <h4>Категория:</h4>
         <table>
             <tr>
                 @foreach (var category in Enum.GetValues(typeof(Category)))
@@ -33,7 +33,7 @@
                 }
             </tr>
         </table>
-        <label>Брэнд:</label>
+        <h4>Брэнд:</h4>
         <table>
             <tr>
                 @foreach (var brand in Enum.GetValues(typeof(Brand)))
@@ -43,7 +43,7 @@
                 }
             </tr>
         </table>
-        <label>Цвет:</label>
+        <h4>Цвет:</h4>
         <table>
             <tr>
                 @foreach (var color in Enum.GetValues(typeof(Color)))
@@ -53,17 +53,18 @@
                 }
             </tr>
         </table>
-        <label>Размеры и их количество:</label>
+        <h4>Размеры и их количество:</h4>
         <table>
             @foreach (var size in Enum.GetValues(typeof(Size)))
             {
+                <input type="hidden" name="Sizes[]" value="@size.GetHashCode()"/>
                 <tr>
                     <td>@(((Size)size).GetDescription()): </td>
                     <td><input type="number" name="Quantities[]" value="0"/></td>
                 </tr>
             }
         </table>
-        <label>Фото:</label>
+        <h4>Фото:</h4>
         <input type="file" name="file"/>
         <br /><br />
         <input type="submit" value="Добавить" />
