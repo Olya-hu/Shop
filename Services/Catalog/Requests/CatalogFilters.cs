@@ -12,6 +12,6 @@ namespace Services.Catalog.Requests
         public Category[] Categories { get; set; }
         public Brand[] Brands { get; set; }
         public Color[] Colors { get; set; }
-        public Size[] Sizes { get; set; }
+        public string[] Sizes { get; set; }
     }
 }

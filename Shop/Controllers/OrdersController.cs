@@ -1,12 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Data;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using Database;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.DbConnection;
 using Services.Orders;
-using Services.Orders.Requests;
 
 namespace Shop.Controllers
 {
@@ -21,46 +18,45 @@ namespace Shop.Controllers
         }
 
         [HttpGet]
-        [Route("getShippings")]
-        public async Task<IEnumerable<Shipping>> GetShippings()
+        [Authorize(Roles = "user")]
+        [Route("shippingSelection")]
+        public async Task<IActionResult> ShippingSelection()
         {
-            return await _orders.GetShippings();
+            return View(await _orders.GetShippings());
         }
 
         [HttpPost]
         [Authorize(Roles = "user")]
-        public async Task<IActionResult> Index([FromBody] OrderRequest request)
-        {
-            if (!ModelState.IsValid)
-                return ValidationProblem();
-            await _orders.Make(request);
-            return new EmptyResult();
-        }
-
-        [HttpPost]
-        [Authorize(Roles = "user")]
-        [Route("addToBag")]
-        public async Task<IActionResult> AddToBag([FromBody] ProductSize ps)
+        public async Task<IActionResult> Index([FromForm] int shippingId)
         {
             if (!ModelState.IsValid)
                 return ValidationProblem();
             if (!int.TryParse(HttpContext.User.FindFirst(x => x.Type == "Id").Value, out var userId))
                 return Unauthorized();
-            if (ps.Quantity <= 0)
-                ModelState.AddModelError("Quantity", "Товара нет на складе");
-            else
-                await _orders.AddToBag(ps, userId);
-            return new EmptyResult();
+            if ((await ShopConnection.Context.User.FindAsync(userId)).Postcode == null)
+                return RedirectToAction("ChangeShippingDetails", "Users");
+            await _orders.Make(userId, shippingId);
+            return RedirectToAction("My");
         }
 
         [HttpGet]
         [Authorize(Roles = "user")]
-        [Route("bag")]
-        public async Task<IActionResult> GetBag()
+        [Route("my/all")]
+        public async Task<IActionResult> My()
         {
             if (!int.TryParse(HttpContext.User.FindFirst(x => x.Type == "Id").Value, out var userId))
                 return Unauthorized();
-            return new ObjectResult(await _orders.GetBagForUser(userId));
+            return View(await _orders.GetOrdersForUser(userId));
+        }
+        
+        [HttpGet]
+        [Authorize(Roles = "user")]
+        [Route("my")]
+        public async Task<IActionResult> MyOrder(int orderId)
+        {
+            if (!int.TryParse(HttpContext.User.FindFirst(x => x.Type == "Id").Value, out var userId))
+                return Unauthorized();
+            return View(await _orders.GetOrder(userId, orderId));
         }
     }
 }

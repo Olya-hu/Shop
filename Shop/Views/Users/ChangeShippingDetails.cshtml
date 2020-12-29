@@ -1,0 +1,25 @@
+﻿@using Database.Enums
+@using Services
+@{
+    ViewData["Title"] = "Изменить данные доставки";
+}
+<div align="center">
+    <form method="post" asp-action="ChangeShippingDetails">
+        <h4>Страна: </h4>
+        <table>
+            <tr>
+                @foreach (var country in Enum.GetValues(typeof(Country)))
+                {
+                    <td><input type="radio" name="Country" value="@country.GetHashCode()" /></td>
+                    <td> @(((Country) country).GetDescription())</td>
+                }
+            </tr>
+        </table>
+        <br />
+        <h4>Адрес: </h4>
+        <input type="text" name="Address" /><br />
+        <h4>Почтовый индекс: </h4>
+        <input type="text" name="Postcode" /><br />
+        <input type="submit" value="Отправить"/>
+    </form>
+</div>

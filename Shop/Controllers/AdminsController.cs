@@ -57,7 +57,10 @@ namespace Shop.Controllers
             var admin = await _dbContext.Admin.FirstOrDefaultAsync(a =>
                 a.Username == request.Username && a.Password == request.Password);
             if (admin == null)
+            {
                 ModelState.AddModelError("Некорректные аутентификационные данные", "Неверные логин и/или пароль");
+                return ValidationProblem();
+            }
             await Authenticate(admin);
             return RedirectToAction("Index");
         }
@@ -84,7 +87,7 @@ namespace Shop.Controllers
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "Catalog");
         }
 
 

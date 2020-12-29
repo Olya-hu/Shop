@@ -1,0 +1,58 @@
+﻿@using Services
+@model Database.Product
+@{
+    ViewData["Title"] = Model.Name;
+}
+<div>
+    <table class="table">
+        <tr>
+            <td><img src="data:image/jpeg;base64,@Convert.ToBase64String(Model.Image)" alt="Not Found"/></td>
+            <td>
+                <form method="post" asp-action="AddToBag">
+                    <input type="hidden" name="productId" value="@Model.Id" />
+                    <table>
+                        <tr><td><h4>@Model.Name</h4></td></tr>
+                        <tr><td>@Model.Price</td></tr>
+                        <tr><td style="white-space: pre-wrap">@Html.Label("", Model.Description, new { align = "Justify"})</td></tr>
+                        <tr><td><table>
+                            <tr><td>Цвет: @Model.Color.GetDescription()</td><td>Брэнд: @Model.Brand.GetDescription()</td></tr>
+                            @if ((bool) ViewData["User"])
+                            {
+                                @if (Model.ProductSize != null && Model.ProductSize.Count > 0)
+                                {
+                                    <tr>
+                                        <td>
+                                            <select name="size">
+                                                <option disabled>Выберите размер</option>
+                                                @foreach (var ps in Model.ProductSize)
+                                                {
+                                                    <option value="@ps.Size">@ps.Size</option>
+                                                }
+                                            </select>
+                                        </td>
+                                        <td><input type="submit" value="Добавить в корзину" /></td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    <tr><td><h5 align="center">Товара нет на складе</h5></td></tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td>
+                                        <h5 align="center">Авторизуйтесь, чтобы добавить в корзину</h5>
+                                        <a class="page-link" asp-controller="Users" asp-action="Login">Вход</a>
+                                        <a class="page-link" asp-controller="Users" asp-action="SignUp">Регистрация</a>
+                                    </td>
+                                </tr>
+                            }
+                            
+                        </table></td></tr>
+                    </table>
+                </form>
+            </td>
+        </tr>
+    </table>
+</div>

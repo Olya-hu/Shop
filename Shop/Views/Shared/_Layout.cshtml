@@ -21,12 +21,30 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Catalog" asp-action="Index">Каталог</a>
                         </li>
-                        <li class="nav-item align-self-end align-content-end">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Login">Войти</a>
-                        </li>
-                        <li class="nav-item align-self-end align-content-end">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="SignUp">Зарегистрироваться</a>
-                        </li>
+                        @if ((bool)ViewData["User"])
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="ChangeShippingDetails">Изменить данные доставки</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Orders" asp-action="My">Мои заказы</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="GetBag">Корзина</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Logout">Выйти</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Login">Войти</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="SignUp">Зарегистрироваться</a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>

@@ -1,4 +1,143 @@
-﻿@model IEnumerable<Database.Product>
+﻿@using Database.Enums
+@using Services
+@model IEnumerable<Database.Product>
 @{
     ViewData["Title"] = "Каталог";
+    var sizes = new[]
+    {
+        "36","37","38","39","40","41","42","43","44","45","46","47","48","50","52","54","56","XS","S","M","L","XL","2XL","3XL","4XL","5XL"
+    };
 }
+<div>
+    <h3>Поиск:</h3>
+    <form method="get">
+        <table>
+            <tr>
+                <td>
+                    <table>
+                        <tr>
+                            <td><input type="text" name="NameContains" width="800"/></td>
+                            <td><input type="submit" name="Найти"/></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table>
+                        <tr>
+                            <td>
+                                <label>Сортировать по цене: </label>
+                                <select name="SortByPrice">
+                                    <option disabled>Сортировать по цене</option>
+                                    <option selected value="true">По убыванию</option>
+                                    <option value="false">По возрастанию</option>
+                                </select>
+                            </td>
+                            <td>
+                                <label>  Цена не менее: </label>
+                                <input type="number" name="PriceHigherThan" value="@(Model.Any() ? Model.Min(product => product.Price) : 0)" width="300"/>
+                            </td>
+                            <td>
+                                <label>  Цена не более: </label>
+                                <input type="number" name="PriceLowerThan" value="@(Model.Any() ? Model.Max(product => product.Price) : 100000)" width="300"/>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table>
+                        <tr>
+                            <td>
+                                <select class="selectpicker" multiple name="Sizes[]">
+                                    <option disabled>Размер</option>
+                                    @foreach (var size in sizes)
+                                    {
+                                        <option value="@size">@size</option>
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                <select class="selectpicker" multiple name="Genders[]">
+                                    <option disabled>Пол</option>
+                                    @foreach (var gender in Enum.GetValues(typeof(Gender)))
+                                    {
+                                        <option value="@gender.GetHashCode()">@(((Gender) gender).GetDescription())</option>
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                <select class="selectpicker" multiple name="Categories[]">
+                                    <option disabled>Категория</option>
+                                    @foreach (var category in Enum.GetValues(typeof(Category)))
+                                    {
+                                        <option value="@category.GetHashCode()">@(((Category) category).GetDescription())</option>
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                <select class="selectpicker" multiple name="Brands[]">
+                                    <option disabled>Брэнд</option>
+                                    @foreach (var brand in Enum.GetValues(typeof(Brand)))
+                                    {
+                                        <option value="@brand.GetHashCode()">@(((Brand) brand).GetDescription())</option>
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                <select class="selectpicker" multiple name="Colors[]">
+                                    <option disabled>Цвет</option>
+                                    @foreach (var color in Enum.GetValues(typeof(Color)))
+                                    {
+                                        <option value="@color.GetHashCode()">@(((Color) color).GetDescription())</option>
+                                    }
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            
+        </table>
+    </form>
+</div>
+<div>
+    <table class="table">
+        @if (Model.Any())
+        {
+            @foreach (var product in Model)
+            {
+                <tr>
+                    <td><img src="data:image/jpeg;base64,@Convert.ToBase64String(product.Image)" alt="Not Found" width="280" height="300"/></td>
+                    <td>
+                        <table class="table">
+                            <tr><td><h5 align="center">@product.Name</h5></td></tr>
+                            <tr><td><h6 align="right">@product.Price</h6></td></tr>
+                            <tr><td style="white-space: pre-wrap">@Html.Label("", product.Description, new {align = "Justify"})</td></tr>
+                            <tr>
+                                <td>
+                                    <div align="center">
+                                        <form method="get" action="/product">
+                                            <input type="hidden" name="productId" value="@product.Id"/>
+                                            <input type="submit" value="Перейти"/>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td>
+                    <h3 align="center">Не найдено ни одного товара</h3>
+                </td>
+            </tr>
+        }
+    </table>
+</div>

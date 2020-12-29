@@ -56,10 +56,15 @@ namespace Services.Catalog
             return await products.Where(product => _dbContext.ProductSize.Any(ps => ps.ProductId == product.Id && ps.Quantity > 0)).ToListAsync();
         }
 
-        public async Task<Dictionary<string, int>> GetSizesFor(int productId)
+        public async Task<Product> GetProduct(int productId)
         {
-            return (await _dbContext.ProductSize.Where(ps => ps.ProductId == productId).ToListAsync())
-                .ToDictionary(ps => ps.Size.ToString(), ps => ps.Quantity);
+            var product = await _dbContext.Product.FindAsync(productId);
+            product.ProductSize.Clear();
+            foreach (var productSize in _dbContext.ProductSize.Where(ps => ps.ProductId == productId))
+            {
+                product.ProductSize.Add(productSize);
+            }
+            return product;
         }
 
         public async Task AddProduct(AddItem request, byte[] image)
@@ -90,6 +95,23 @@ namespace Services.Catalog
                     });
             }
 
+            await _dbContext.SaveChangesAsync();
+        }
+        
+        public async Task AddToBag(int productId, string size, int userId)
+        {
+            await _dbContext.Bag.AddAsync(new Bag
+            {
+                UserId = userId,
+                ProductId = productId,
+                Size = size
+            });
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task RemoveFromBag(int productId, string size, int userId)
+        {
+            _dbContext.Remove(await _dbContext.Bag.FindAsync(userId, productId, size));
             await _dbContext.SaveChangesAsync();
         }
     }

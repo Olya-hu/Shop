@@ -15,6 +15,9 @@ namespace Shop.Controllers
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {
+            
+            ViewData["User"] = HttpContext.User.Identity.IsAuthenticated && HttpContext.User.IsInRole("user");;
+            ViewData["Admin"] = HttpContext.User.Identity.IsAuthenticated && HttpContext.User.IsInRole("admin");
             base.OnActionExecuting(context);
             ShopConnection.BeginTransaction();
         }

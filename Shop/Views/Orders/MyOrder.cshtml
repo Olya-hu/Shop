@@ -1,0 +1,55 @@
+﻿@using Services
+@model Database.Order
+@{
+    ViewData["Title"] = "Детали заказа";
+}
+<div>
+    @if (Model == null)
+    {
+        <h4>Заказ не найден.</h4>
+    }
+    else
+    {
+        <h4>Детали заказа:</h4>
+        <table class="table">
+            <tr>
+                <td>
+                    <table>
+                        <tr>
+                            <td><h5>Доставка:</h5></td>
+                            <td>@Model.Shipping.Name</td>
+                            <td>@Model.Shipping.Company</td>
+                            <td>@Model.Shipping.Description</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table>
+                        @foreach (var productOrder in Model.ProductOrder)
+                        {
+                            var product = productOrder.Product.Product;
+                            <tr>
+                                <td><img src="data:image/jpeg;base64,@Convert.ToBase64String(product.Image)" alt="Not Found" width="280" height="300"/></td>
+                                <td>
+                                    <table>
+                                        <tr>
+                                            <td><h4>@product.Name</h4></td>
+                                            <td><h5>@product.Price</h5></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Артикул: @product.VendorCode</td>
+                                            <td>Цвет: @product.Color.GetDescription()</td>
+                                            <td>@productOrder.Product.Size</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        }
+                    </table>
+                </td>
+            </tr>
+        </table>
+    }
+</div>

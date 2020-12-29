@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using Database;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,10 +12,12 @@ using Services.DbConnection;
 
 namespace Shop.Controllers
 {
+    [Route("")]
     [Route("catalog")]
     public class CatalogController : BaseDbController
     {
         private readonly ICatalog _catalog;
+        private readonly string[] _trustedExtensions = {".jpg", ".png"};
 
         public CatalogController(ICatalog catalog, IShopConnection connection) : base(connection)
         {
@@ -23,14 +27,14 @@ namespace Shop.Controllers
         [HttpGet]
         public async Task<IActionResult> Index([FromQuery] CatalogFilters filters)
         {
-            return ModelState.IsValid ? new ObjectResult(await _catalog.GetWithFilters(filters)) : ValidationProblem();
+            return ModelState.IsValid ? View(await _catalog.GetWithFilters(filters)) : ValidationProblem();
         }
 
         [HttpGet]
-        [Route("{productId:int}/sizes")]
-        public async Task<Dictionary<string, int>> GetSizesFor(int productId)
+        [Route("product")]
+        public async Task<IActionResult> Product(int productId)
         {
-            return await _catalog.GetSizesFor(productId);
+            return View("Product", await _catalog.GetProduct(productId));
         }
         
         [HttpGet]
@@ -38,7 +42,7 @@ namespace Shop.Controllers
         [Authorize(Roles = "admin")]
         public IActionResult AddItem()
         {
-            return View("~/Views/Admins/AddItem.cshtml");
+            return View();
         }
 
         [HttpPost]
@@ -46,7 +50,11 @@ namespace Shop.Controllers
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> AddItem([FromForm] AddItem request, IFormFile file)
         {
-            if (!ModelState.IsValid || file == null)
+            if (file == null)
+                ModelState.AddModelError("File", "Файл не был получен");
+            if (!_trustedExtensions.Contains(Path.GetExtension(file?.FileName)))
+                ModelState.AddModelError("File","Был передан неверный тип файла");
+            if (!ModelState.IsValid)
                 return ValidationProblem();
             byte[] image = null;
             await using (var memoryStream = new MemoryStream())
@@ -65,6 +73,32 @@ namespace Shop.Controllers
             }
             await _catalog.AddProduct(request, image);
             return RedirectToAction("AddItem");
+        }
+        
+        [HttpPost]
+        [Authorize(Roles = "user")]
+        [Route("addToBag")]
+        public async Task<IActionResult> AddToBag([FromForm] int productId, [FromForm] string size)
+        {
+            if (!ModelState.IsValid)
+                return ValidationProblem();
+            if (!int.TryParse(HttpContext.User.FindFirst(x => x.Type == "Id").Value, out var userId))
+                return Unauthorized();
+            await _catalog.AddToBag(productId, size, userId);
+            return RedirectToAction("Index");
+        }
+        
+        [HttpPost]
+        [Authorize(Roles = "user")]
+        [Route("removeFromBag")]
+        public async Task<IActionResult> RemoveFromBag([FromForm] int productId, [FromForm] string size)
+        {
+            if (!ModelState.IsValid)
+                return ValidationProblem();
+            if (!int.TryParse(HttpContext.User.FindFirst(x => x.Type == "Id").Value, out var userId))
+                return Unauthorized();
+            await _catalog.RemoveFromBag(productId, size, userId);
+            return RedirectToAction("GetBag", "Users");
         }
     }
 }

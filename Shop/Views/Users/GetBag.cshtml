@@ -1,0 +1,44 @@
+﻿@using Services
+@model IEnumerable<Database.Bag>
+@{
+    ViewData["Title"] = "Корзина";
+}
+<div align="center">
+    <a class="btn-block" asp-controller="Orders" asp-action="ShippingSelection">Сделать заказ</a>
+</div>
+<table class="table">
+    @if (Model == null || !Model.Any())
+    {
+        <tr><td><h4>Корзина пуста.</h4></td></tr>
+    }
+    else
+    {
+        @foreach (var bag in Model)
+        {
+            var product = bag.ProductSize.Product;
+            <tr>
+                <td><img src="data:image/jpeg;base64,@Convert.ToBase64String(product.Image)" alt="Not Found" width="280" height="300"/></td>
+                <td>
+                    <table>
+                        <tr>
+                            <td><h4>@product.Name</h4></td>
+                            <td><h5>@product.Price</h5></td>
+                        </tr>
+                        <tr>
+                            <td>Артикул: @product.VendorCode</td>
+                            <td>Цвет: @product.Color.GetDescription()</td>
+                            <td>@bag.ProductSize.Size</td>
+                        </tr>
+                    </table>
+                </td>
+                <td>
+                    <form method="post" asp-controller="Catalog" asp-action="RemoveFromBag">
+                        <input type="hidden" name="productId" value="@product.Id"/>
+                        <input type="hidden" name="size" value="@bag.Size"/>
+                        <input type="submit" value="Удалить"/>
+                    </form>
+                </td>
+            </tr>
+        }
+    }
+</table>

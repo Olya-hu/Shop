@@ -1,0 +1,35 @@
+﻿@model IEnumerable<Database.Order>
+@{
+    ViewData["Title"] = "Мои заказы";
+}
+<div>
+    <table class="table">
+        @if (Model == null || !Model.Any())
+        {
+            <tr><td><h4>Заказы не найдены</h4></td></tr>
+        }
+        else
+        {
+            <tr>
+                <th>Номер заказа</th>
+                <th>Дата заказа</th>
+                <th>Сумма заказа</th>
+                <th></th>
+            </tr>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td>@order.Id</td>
+                    <td>@order.Date</td>
+                    <td>@order.Payment</td>
+                    <td>
+                        <form method="get" asp-action="MyOrder">
+                            <input type="hidden" name="orderId" value="@order.Id"/>
+                            <input type="submit" value="Детали"/>
+                        </form>
+                    </td>
+                </tr>
+            }
+        }
+    </table>
+</div>

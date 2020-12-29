@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Database;
 using Microsoft.EntityFrameworkCore;
 using Services.DbConnection;
-using Services.Orders.Requests;
 
 namespace Services.Orders
 {
@@ -23,21 +22,21 @@ namespace Services.Orders
             return await _dbContext.Shipping.ToListAsync();
         }
 
-        public async Task Make(OrderRequest request)
+        public async Task Make(int userId, int shippingId)
         {
-            if ((await _dbContext.User.FindAsync(request.UserId)).Postcode == null)
-                throw new ArgumentNullException("Отсутствует почтовый индекс");
+            var bagItems = await GetBagForUser(userId);
+            decimal payment = 0;
+            foreach (var bagItem in bagItems)
+            {
+                payment += (await _dbContext.Product.FindAsync(bagItem.ProductId)).Price;
+            }
 
-            var bagItems = await GetBagForUser(request.UserId);
-            
-            var payment = await _dbContext.Product.Where(product => bagItems.Any(bag => bag.ProductId == product.Id))
-                              .SumAsync(product => product.Price)
-                          + (await _dbContext.Shipping.FindAsync(request.ShippingId)).Price;
-            
+            payment += (await _dbContext.Shipping.FindAsync(shippingId)).Price;
+
             var order = (await _dbContext.Order.AddAsync(new Order
             {
-                UserId = request.UserId,
-                ShippingId = request.ShippingId,
+                UserId = userId,
+                ShippingId = shippingId,
                 Date = DateTime.Now,
                 Payment = payment
             })).Entity;
@@ -58,20 +57,38 @@ namespace Services.Orders
                     _dbContext.ProductSize.Remove(productSize);
                 await _dbContext.SaveChangesAsync();
             }
-        }
-
-        public async Task AddToBag(ProductSize ps, int userId)
-        {
-            await _dbContext.Bag.AddAsync(new Bag
-            {
-                UserId = userId,
-                ProductId = ps.ProductId,
-                Size = ps.Size
-            });
+            
+            _dbContext.Bag.RemoveRange(bagItems);
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Bag>> GetBagForUser(int userId)
+        public async Task<List<Order>> GetOrdersForUser(int userId)
+        {
+            var orders = await _dbContext.Order.Where(order => order.UserId == userId).ToListAsync();
+
+            return orders;
+        }
+
+        public async Task<Order> GetOrder(int userId, int orderId)
+        {
+            var order = await _dbContext.Order.FindAsync(orderId);
+            if (order != null && order.UserId == userId)
+            {
+                order.ProductOrder = await _dbContext.ProductOrder.Where(po => po.OrderId == order.Id).ToListAsync();
+                foreach (var productOrder in order.ProductOrder)
+                {
+                    productOrder.Product =
+                        await _dbContext.ProductSize.FindAsync(productOrder.ProductId, productOrder.ProductSize);
+                    productOrder.Product.Product = await _dbContext.Product.FindAsync(productOrder.ProductId);
+                }
+
+                order.Shipping = await _dbContext.Shipping.FindAsync(order.ShippingId);
+            }
+
+            return order;
+        }
+
+        private async Task<List<Bag>> GetBagForUser(int userId)
         {
             return await _dbContext.Bag.Where(bag => bag.UserId == userId).ToListAsync();
         }

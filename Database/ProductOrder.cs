@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Database.Enums;
 
 namespace Database
 {
@@ -16,8 +15,8 @@ namespace Database
         [Column("product_id")]
         public int ProductId { get; set; }
         [Key]
-        [Column("product_size", TypeName = "enum('36','38','40','42','44','46','48','50','52','54','56')")]
-        public Size ProductSize { get; set; }
+        [Column("product_size", TypeName = "enum('36','37','38','39','40','41','42','43','44','45','46','47','48','50','52','54','56','XS','S','M','L','XL','2XL','3XL','4XL','5XL')")]
+        public string ProductSize { get; set; }
 
         [ForeignKey(nameof(OrderId))]
         [InverseProperty("ProductOrder")]
