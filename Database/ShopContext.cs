@@ -87,6 +87,11 @@ namespace Database
                 entity.HasIndex(e => e.UserId)
                     .HasName("order_user_fk");
 
+                entity.Property(e => e.Status)
+                    .HasDefaultValueSql("'Processing'")
+                    .HasCharSet("utf8mb4")
+                    .HasCollation("utf8mb4_general_ci");
+                
                 entity.HasOne(d => d.Shipping)
                     .WithMany(p => p.Order)
                     .HasForeignKey(d => d.ShippingId)

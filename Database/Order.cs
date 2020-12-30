@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Database.Enums;
 
 namespace Database
 {
@@ -24,6 +25,9 @@ namespace Database
         public DateTime Date { get; set; }
         [Column("payment", TypeName = "decimal(10,2)")]
         public decimal Payment { get; set; }
+        [Required]
+        [Column("status", TypeName = "enum('Processing','Shipping','Delivered')")]
+        public Status Status { get; set; }
 
         [ForeignKey(nameof(ShippingId))]
         [InverseProperty("Order")]
