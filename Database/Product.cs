@@ -37,7 +37,7 @@ namespace Database
         [Column("brand", TypeName = "enum('Adidas','Nike','Puma','Supreme','Asos','Bershka')")]
         public Brand Brand { get; set; }
         [Required]
-        [Column("color", TypeName = "enum('White','Black','Black&White','Grey','Red','Orange','Yellow','Green','Cyan','Blue','Purple','Pink','Multicolor')")]
+        [Column("color", TypeName = "enum('White','Black','BlackWhite','Grey','Red','Orange','Yellow','Green','Cyan','Blue','Purple','Pink','Multicolor')")]
         public Color Color { get; set; }
         [Required]
         [Column("image", TypeName = "mediumblob")]

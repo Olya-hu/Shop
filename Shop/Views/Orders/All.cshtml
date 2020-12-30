@@ -1,0 +1,62 @@
+﻿@using Services
+@using Database.Enums
+@model IEnumerable<Database.Order>
+@{
+    Layout = "../Admins/_Layout.cshtml";
+    ViewData["Title"] = "Все заказы";
+}
+<div>
+    <h3>Поиск по номеру заказа:</h3>
+    <form method="get">
+        <input type="number" name="orderId"/>
+        <input type="submit" value="Найти"/>
+    </form>
+</div>
+<div>
+    @if (Model == null || !Model.Any())
+    {
+        <h4>Заказы не найдены</h4>
+    }
+    else
+    {
+        <h4 align="center">Заказы:</h4>
+        <table class="table">
+            <tr>
+                <th>Номер</th>
+                <th>Дата</th>
+                <th>Сумма</th>
+                <th>Статус</th>
+                <th>Email пользователя</th>
+                <th></th>
+            </tr>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td>@order.Id</td>
+                    <td>@order.Date</td>
+                    <td>@order.Payment</td>
+                    <td>
+                        <form method="post" asp-action="ChangeOrderStatus">
+                            <input type="hidden" name="orderId" value="@order.Id"/>
+                            <select name="status">
+                                @foreach (var status in Enum.GetValues(typeof(Status)))
+                                {
+                                    <option selected="@((Status) status == order.Status)" value="@status.GetHashCode()">@(((Status) status).GetDescription())</option>
+                                }
+                            </select>
+                            <input type="submit" value="Применить"/>
+                        </form>
+                    </td>
+                    <td>@order.User.Email</td>
+                    <td>
+                        <form method="get" asp-action="All">
+                            <input type="hidden" name="list" value="false"/>
+                            <input type="hidden" name="orderId" value="@order.Id"/>
+                            <input type="submit" value="Детали"/>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </table>
+    }
+</div>

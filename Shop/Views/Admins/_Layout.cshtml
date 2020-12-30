@@ -18,13 +18,16 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
                     <ul class="navbar-nav flex-grow-1">
-                        @if ((bool) ViewData["Admin"])
+                        @if ((bool)ViewData["Admin"])
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Admins" asp-action="Index">Администрация</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Catalog" asp-action="AddItem">Добавить товар в каталог</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Orders" asp-action="All">Заказы</a>
                             </li>
                             <li class="nav-item align-self-end align-content-end">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Admins" asp-action="Logout">Выйти</a>

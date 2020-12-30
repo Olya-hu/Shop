@@ -17,8 +17,9 @@
     {
         if (!string.IsNullOrEmpty(ViewData["AdminsPassword"].ToString()))
         {
-            <p>Пароль только что добавленного администратора: @ViewData["AdminsPassword"].ToString()<br/>
+            <p class="text-info">Пароль только что добавленного администратора: @ViewData["AdminsPassword"].ToString()<br/>
                 Сохраните его!</p>
+            @(ViewData["AdminsPassword"] = null)
         }
     }
 </div>

@@ -30,8 +30,7 @@ namespace Shop.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            ViewData["AdminsPassword"] = _recentlyAddedAdminsPassword;
-            _recentlyAddedAdminsPassword = null;
+            //["AdminsPassword"] = _recentlyAddedAdminsPassword;
             return View(await _dbContext.Admin.Select(admin => new AdminViewModel
             {
                 Id = admin.Id,
@@ -59,7 +58,7 @@ namespace Shop.Controllers
             if (admin == null)
             {
                 ModelState.AddModelError("Некорректные аутентификационные данные", "Неверные логин и/или пароль");
-                return ValidationProblem();
+                return RedirectToAction("Login");
             }
             await Authenticate(admin);
             return RedirectToAction("Index");
@@ -97,6 +96,8 @@ namespace Shop.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest();
+            if (string.IsNullOrEmpty(username))
+                return RedirectToAction("Index");
             _recentlyAddedAdminsPassword = RandomPassword();
             try
             {

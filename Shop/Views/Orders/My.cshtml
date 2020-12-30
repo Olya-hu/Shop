@@ -1,19 +1,22 @@
-﻿@model IEnumerable<Database.Order>
+﻿@using Services
+@model IEnumerable<Database.Order>
 @{
     ViewData["Title"] = "Мои заказы";
 }
 <div>
-    <table class="table">
-        @if (Model == null || !Model.Any())
-        {
-            <tr><td><h4>Заказы не найдены</h4></td></tr>
-        }
-        else
-        {
+    @if (Model == null || !Model.Any())
+    {
+        <h4>Заказы не найдены</h4>
+    }
+    else
+    {
+        <h4 align="center">Ваши заказы:</h4>
+        <table class="table">
             <tr>
-                <th>Номер заказа</th>
-                <th>Дата заказа</th>
-                <th>Сумма заказа</th>
+                <th>Номер</th>
+                <th>Дата</th>
+                <th>Сумма</th>
+                <th>Статус</th>
                 <th></th>
             </tr>
             @foreach (var order in Model)
@@ -22,14 +25,15 @@
                     <td>@order.Id</td>
                     <td>@order.Date</td>
                     <td>@order.Payment</td>
+                    <td>@order.Status.GetDescription()</td>
                     <td>
-                        <form method="get" asp-action="MyOrder">
-                            <input type="hidden" name="orderId" value="@order.Id"/>
-                            <input type="submit" value="Детали"/>
+                        <form method="get" asp-action="My">
+                            <input type="hidden" name="orderId" value="@order.Id" />
+                            <input type="submit" value="Детали" />
                         </form>
                     </td>
                 </tr>
             }
-        }
-    </table>
+        </table>
+    }
 </div>

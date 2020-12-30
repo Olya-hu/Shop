@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Database;
+using Database.Enums;
 using Microsoft.EntityFrameworkCore;
 using Services.DbConnection;
 
@@ -62,17 +63,30 @@ namespace Services.Orders
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<List<Order>> GetOrdersForUser(int userId)
+        public async Task<IEnumerable<Order>> GetAllOrders(int orderId = -1)
         {
-            var orders = await _dbContext.Order.Where(order => order.UserId == userId).ToListAsync();
+            List<Order> orders = null;
+            if (orderId == -1)
+                orders = await _dbContext.Order.ToListAsync();
+            else
+                orders = new List<Order> { await _dbContext.Order.FindAsync(orderId) };
+            foreach (var order in orders)
+            {
+                order.User = await _dbContext.User.FindAsync(order.UserId);
+            }
 
             return orders;
         }
 
-        public async Task<Order> GetOrder(int userId, int orderId)
+        public async Task<List<Order>> GetOrdersForUser(int userId)
+        {
+            return await _dbContext.Order.Where(order => order.UserId == userId).ToListAsync();
+        }
+
+        public async Task<Order> GetOrder(int orderId)
         {
             var order = await _dbContext.Order.FindAsync(orderId);
-            if (order != null && order.UserId == userId)
+            if (order != null)
             {
                 order.ProductOrder = await _dbContext.ProductOrder.Where(po => po.OrderId == order.Id).ToListAsync();
                 foreach (var productOrder in order.ProductOrder)
@@ -86,6 +100,13 @@ namespace Services.Orders
             }
 
             return order;
+        }
+
+        public async Task ChangeStatus(int orderId, Status status)
+        {
+            var order = await _dbContext.Order.FindAsync(orderId);
+            order.Status = status;
+            await _dbContext.SaveChangesAsync();
         }
 
         private async Task<List<Bag>> GetBagForUser(int userId)

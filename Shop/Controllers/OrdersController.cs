@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using Database.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.DbConnection;
@@ -41,22 +42,34 @@ namespace Shop.Controllers
 
         [HttpGet]
         [Authorize(Roles = "user")]
-        [Route("my/all")]
-        public async Task<IActionResult> My()
-        {
-            if (!int.TryParse(HttpContext.User.FindFirst(x => x.Type == "Id").Value, out var userId))
-                return Unauthorized();
-            return View(await _orders.GetOrdersForUser(userId));
-        }
-        
-        [HttpGet]
-        [Authorize(Roles = "user")]
         [Route("my")]
-        public async Task<IActionResult> MyOrder(int orderId)
+        public async Task<IActionResult> My(int orderId = -1)
         {
             if (!int.TryParse(HttpContext.User.FindFirst(x => x.Type == "Id").Value, out var userId))
                 return Unauthorized();
-            return View(await _orders.GetOrder(userId, orderId));
+            if (orderId == -1)
+                return View(await _orders.GetOrdersForUser(userId));
+            var order = await _orders.GetOrder(orderId);
+            if (order.UserId != userId)
+                return Unauthorized();
+            return View("Order", order);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "admin")]
+        [Route("all")]
+        public async Task<IActionResult> All(bool list = true, int orderId = -1)
+        {
+            return list ? View(await _orders.GetAllOrders(orderId)) : View("Order", await _orders.GetOrder(orderId));
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "admin")]
+        [Route("changeOrderStatus")]
+        public async Task<IActionResult> ChangeOrderStatus(int orderId, Status status)
+        {
+            await _orders.ChangeStatus(orderId, status);
+            return RedirectToAction("All");
         }
     }
 }

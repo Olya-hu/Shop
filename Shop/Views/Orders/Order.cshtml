@@ -43,6 +43,16 @@
                                             <td>Цвет: @product.Color.GetDescription()</td>
                                             <td>@productOrder.Product.Size</td>
                                         </tr>
+                                        <tr>
+                                            <td>
+                                                <div align="center">
+                                                    <form method="get" action="/product">
+                                                        <input type="hidden" name="productId" value="@product.Id"/>
+                                                        <input class="btn-link" type="submit" value="Перейти"/>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
                                     </table>
                                 </td>
                             </tr>
