@@ -13,14 +13,11 @@
         </table>
         
     </form>
-    @if (ViewData["AdminsPassword"] != null)
+    @if (!string.IsNullOrEmpty((string) ViewData["AdminsPassword"]))
     {
-        if (!string.IsNullOrEmpty(ViewData["AdminsPassword"].ToString()))
-        {
-            <p class="text-info">Пароль только что добавленного администратора: @ViewData["AdminsPassword"].ToString()<br/>
-                Сохраните его!</p>
-            @(ViewData["AdminsPassword"] = null)
-        }
+        <p class="text-info">Пароль только что добавленного администратора: @ViewData["AdminsPassword"]<br/>
+            Сохраните его!</p>
+        @(ViewData["AdminsPassword"] = "")
     }
 </div>
 <div>

@@ -20,7 +20,7 @@ namespace Shop.Controllers
     public class AdminsController : BaseDbController
     {
         private readonly ShopContext _dbContext;
-        private string _recentlyAddedAdminsPassword;
+        private string _recentlyAddedAdminsPassword = "";
 
         public AdminsController(IShopConnection shopConnection) : base(shopConnection)
         {
@@ -30,7 +30,8 @@ namespace Shop.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            //["AdminsPassword"] = _recentlyAddedAdminsPassword;
+            ViewData["AdminsPassword"] = _recentlyAddedAdminsPassword;
+            _recentlyAddedAdminsPassword = "";
             return View(await _dbContext.Admin.Select(admin => new AdminViewModel
             {
                 Id = admin.Id,
@@ -110,7 +111,7 @@ namespace Shop.Controllers
             }
             catch (Exception)
             {
-                _recentlyAddedAdminsPassword = null;
+                _recentlyAddedAdminsPassword = "";
                 throw;
             }
 
